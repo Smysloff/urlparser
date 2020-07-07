@@ -8,7 +8,7 @@ System Requirements
 
 You need:
 
-- **PHP >= 7.3** but the latest stable version of PHP is recommended
+- **PHP >= 7.4** but the latest stable version of PHP is recommended
 
 
 Installation
