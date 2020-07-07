@@ -21,16 +21,14 @@ $ composer require selby/urlparser
 How to use it
 --------
 
-## Basic usage
-
-Very simple:
+### Basic usage
 
 ```php
 use \Selby\UrlParser;
 
-$s = new UrlParser('http://example.com');
+$url = new UrlParser('http://example.com');
 
-echo $s->host();
+echo $url->host();
 ```
 
 License
