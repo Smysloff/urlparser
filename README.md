@@ -15,7 +15,7 @@ Installation
 --------
 
 ```bash
-$ composer require selby/uri-urlparser
+$ composer require selby/urlparser
 ```
 
 How to use it
