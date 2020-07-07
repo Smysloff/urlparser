@@ -1,0 +1,31 @@
+{
+    "name": "selby/urlparser",
+    "type": "library",
+    "description": "Small and simple url parser library",
+    "homepage": "https://github.com/Smysloff/urlparser",
+    "keywords": [
+        "url",
+        "uri",
+        "parser"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexander Smyslov",
+            "email": "smyslov@selby.su",
+            "role": "Developer",
+            "homepage": "https://selby.su/sozdanie-saytov"
+        }
+    ],
+    "support": {
+        "email": "smyslov@selby.su"
+    },
+    "require": {
+        "php": ">=7.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Selby\\": "src"
+        }
+    }
+}
