@@ -26,6 +26,12 @@ class UrlParser
      */
     public string $url;
 
+
+    /**
+     * @var string
+     */
+    public string $link;
+
     /**
      * url scheme
      * 
@@ -79,6 +85,11 @@ class UrlParser
     public ?string $fragment;
 
     /**
+     * @var string|null
+     */
+    public ?string $hostAsLink;
+
+    /**
      * array of url slugs
      * 
      * @var array
@@ -90,37 +101,95 @@ class UrlParser
      * 
      * @var object
      */
-    public object $params;
+    public ?object $params;
 
 
     /**
      * @param string $url needle url string
      */
-    public function __construct(string $url)
+    public function __construct(?string $url = null)
     {
-        $this->url = $url;
+        $this->url  = $url ?: $this->getCurrentUrl();
+        $this->link = $this->getLink($this->url);
+        $components = (object) parse_url($this->link);
 
-        $components = (object) parse_url($url);
-
-        $this->scheme   = $components->scheme ?? null;
-        $this->host     = $components->host ?? null;
-        $this->port     = $components->port ?? null;
-        $this->user     = $components->user ?? null;
-        $this->pass     = $components->pass ?? null;
-        $this->path     = $components->path ?? null;
-        $this->query    = $components->query ?? null;
+        $this->scheme   = $components->scheme   ?? null;
+        $this->host     = $components->host     ?? null;
+        $this->port     = $components->port     ?? null;
+        $this->user     = $components->user     ?? null;
+        $this->pass     = $components->pass     ?? null;
+        $this->path     = $components->path     ?? null;
+        $this->query    = $components->query    ?? null;
         $this->fragment = $components->fragment ?? null;
+
+        $this->hostAsLink = $this->getHostAsLink($this->scheme, $this->host);
 
         $this->slugs = explode('/', trim($this->path, '/'));
 
+        // $this->params
         if (!empty($this->query)) {
             $this->params = new \stdClass();
             foreach ( explode('&', $this->query) as $part ) {
-                [$param, $value] = explode('=', $part);
+                $parts = explode('=', $part);
+                $param = $parts[0];
+                $value = $parts[1] ?? null;
                 $this->params->$param = $value;
             }
+        } else {
+            $this->params = null;
         }
+        
+    }
 
+
+    /**
+     * Возвращает полный адрес текущей страницы
+     * 
+     * @return string
+     */
+    protected function getCurrentUrl(): string
+    {
+        return ((empty($_SERVER['HTTPS'])) ? 'http' : 'https') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];     
+    }
+
+    /**
+     * Проверяет url на соответствие формату,
+     * который принимается функцией parse_url.
+     * При возможности - модифицирует url о приемлемого формата.
+     * 
+     * @param string|null $url
+     * 
+     * @return string
+     */
+    protected function getLink(?string $url = null): ?string
+    {
+        // если url в приемлемом формате для parse_url,
+        // то возвращаем его как он есть
+        $pattern = '#^(?:https?)?:?//([^/]+).*$#';
+        if ( preg_match($pattern, $url) )
+            return $url;
+
+        // если формат не приемлемый, но найден домен
+        // возвращаем url, достроенный до приемлемого формата
+        $pattern = '#^([^/\@\?\s\.\-\+\!\"\#\№\$\;\^\:\&\*\(\)\_\=\{\}\[\]\|\\\,\<\>\~\`\']).*$#';
+        if ( preg_match($pattern, $url) )
+            return '//' . $url;
+
+        // иначе это просто строка (возможно REQUEST_URI)
+        // возвращаем url как он есть
+        return $url;
+    }
+
+
+    /**
+     * @param string|null $host
+     * @param string|null $scheme
+     * 
+     * @return string|null
+     */
+    protected function getHostAsLink(?string $scheme = null, ?string $host = null): ?string
+    {
+        return !empty($this->host) ? ltrim($this->scheme . '://' . $this->host, ':') : null;
     }
 
 }
